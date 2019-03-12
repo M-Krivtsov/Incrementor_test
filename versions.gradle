@@ -1,0 +1,7 @@
+// Dependency versions for projects
+def versions = [:]
+
+versions.junit = '4.12'
+versions.hamcrest = '2.1'
+
+rootProject.ext.versions = versions
