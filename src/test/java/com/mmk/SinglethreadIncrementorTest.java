@@ -54,6 +54,20 @@ public abstract class SinglethreadIncrementorTest {
         System.out.println(String.format(Locale.getDefault(), "%d increments took %d ms", requiredIncrementCount, stopWatch.getElapsedTimeMillis()));
     }
 
+    // Incrementor value must match modulus of increments count by Integer.MAX_VALUE as it resets on reaching maximum value
+    @Test
+    public void testMultipleIncrementationWithMaxLimit() {
+        long requiredIncrementCount = Integer.MAX_VALUE + 10L;
+
+        Incrementor incrementor = createNewIncrementorInstance();
+
+        for (long i = 0; i < requiredIncrementCount; ++i) {
+            incrementor.incrementNumber();
+        }
+
+        assertThat((long)incrementor.getNumber(), is(requiredIncrementCount % Integer.MAX_VALUE));
+    }
+
     // Incrementor value must match modulus of increments count by maximum value as it resets on reaching maximum value
     @Test
     public void testMultipleIncrementationWithLimit() {
