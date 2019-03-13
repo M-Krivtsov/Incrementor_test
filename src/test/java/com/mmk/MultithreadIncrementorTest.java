@@ -11,8 +11,7 @@ import static org.hamcrest.CoreMatchers.*;
 
 public abstract class MultithreadIncrementorTest extends SinglethreadIncrementorTest {
     // Multi-Thread aware Incrementor value must match count of increments if it is less than maximum (Integer.MAX_VALUE)
-    public void testMultipleIncrementationMultithread(Incrementor incrementor, int maximumValue) {
-        int threadCount = 16;                              // how many threads we would use in parallel
+    public void testMultipleIncrementationMultithread(Incrementor incrementor, int threadCount, int maximumValue) {
         int requiredIncrementCount = HIGH_INCREMENT_COUNT; // expected total count of increments
         // split evenly between threads
         int requiredIncrementCountPerThread = (requiredIncrementCount + threadCount - 1) / threadCount;
@@ -76,19 +75,47 @@ public abstract class MultithreadIncrementorTest extends SinglethreadIncrementor
         System.out.println(String.format(Locale.getDefault(), "%d increments took %d ms on %d threads", requiredIncrementCount, stopWatch.getElapsedTimeMillis(), threadCount));
     }
 
-    // Multi-Thread aware Incrementor value must match count of increments if it is less than maximum (Integer.MAX_VALUE)
+    // Multi-Thread aware Incrementor value must match count of increments if it is less than maximum (Integer.MAX_VALUE) on single thread
     @Test
-    public void testMultipleIncrementationMultithread() {
-        testMultipleIncrementationMultithread(createNewIncrementorInstance(), Integer.MAX_VALUE);
+    public void testMultipleIncrementationSinglethread() {
+        testMultipleIncrementationMultithread(createNewIncrementorInstance(), 1, Integer.MAX_VALUE);
     }
 
-    // Multi-Thread aware Incrementor value must match modulus of increments count by maximum value as it resets on reaching maximum value
+    // Multi-Thread aware Incrementor value must match modulus of increments count by maximum value as it resets on reaching maximum value on single thread
+    @Test
+    public void testMultipleIncrementationSinglethreadWithLimit() {
+        int maximumValue = 250;
+
+        Incrementor incrementor = createNewIncrementorInstance();
+        incrementor.setMaximumValue(maximumValue);
+        testMultipleIncrementationMultithread(incrementor, 1, maximumValue);
+    }
+
+    // Multi-Thread aware Incrementor value must match count of increments if it is less than maximum (Integer.MAX_VALUE) on multi threads
+    @Test
+    public void testMultipleIncrementationMultithread() {
+        testMultipleIncrementationMultithread(createNewIncrementorInstance(), 16, Integer.MAX_VALUE);
+    }
+
+    // Multi-Thread aware Incrementor value must match modulus of increments count by maximum value as it resets on reaching maximum value on multiple threads
     @Test
     public void testMultipleIncrementationMultithreadWithLimit() {
         int maximumValue = 250;
 
         Incrementor incrementor = createNewIncrementorInstance();
         incrementor.setMaximumValue(maximumValue);
-        testMultipleIncrementationMultithread(incrementor, maximumValue);
+        testMultipleIncrementationMultithread(incrementor, 16, maximumValue);
     }
+
+    // Multi-Thread aware Incrementor value must match modulus of increments count by maximum value as it resets on reaching maximum value on multiple threads
+    // in case of more threads than maximumValue
+    @Test
+    public void testMultipleIncrementationOnManyThreadsWithLimit() {
+        int maximumValue = 250;
+
+        Incrementor incrementor = createNewIncrementorInstance();
+        incrementor.setMaximumValue(maximumValue);
+        testMultipleIncrementationMultithread(incrementor, maximumValue * 8, maximumValue);
+    }
+
 }
