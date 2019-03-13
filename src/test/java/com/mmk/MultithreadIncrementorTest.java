@@ -5,6 +5,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.CyclicBarrier;
 import java.util.concurrent.BrokenBarrierException;
 import java.util.Locale;
+import org.junit.Test;
 import static org.junit.Assert.*;
 import static org.hamcrest.CoreMatchers.*;
 
@@ -75,4 +76,19 @@ public abstract class MultithreadIncrementorTest extends SinglethreadIncrementor
         System.out.println(String.format(Locale.getDefault(), "%d increments took %d ms on %d threads", requiredIncrementCount, stopWatch.getElapsedTimeMillis(), threadCount));
     }
 
+    // Multi-Thread aware Incrementor value must match count of increments if it is less than maximum (Integer.MAX_VALUE)
+    @Test
+    public void testMultipleIncrementationMultithread() {
+        testMultipleIncrementationMultithread(createNewIncrementorInstance(), Integer.MAX_VALUE);
+    }
+
+    // Multi-Thread aware Incrementor value must match modulus of increments count by maximum value as it resets on reaching maximum value
+    @Test
+    public void testMultipleIncrementationMultithreadWithLimit() {
+        int maximumValue = 250;
+
+        Incrementor incrementor = createNewIncrementorInstance();
+        incrementor.setMaximumValue(maximumValue);
+        testMultipleIncrementationMultithread(incrementor, maximumValue);
+    }
 }
